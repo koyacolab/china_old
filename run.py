@@ -17,6 +17,8 @@ TASK = dict()
 # with open('data/task.json') as json_file:
 #     TASK = json.load(json_file)
 
+## for github 
+
 TASK = { 
 'YIELD_DATA_PATH' : "data/china_yield/wheat_2002-2018.csv",
 'CLEAR_YIELD_DATA_PATH' : "data/china_yield/wheat_clear.csv",
@@ -243,7 +245,8 @@ class RunTask:
 
     @staticmethod
     def train_cnn(
-        cleaned_data_path=Path(TASK['CLEANED_DATA_PATH']),
+        # cleaned_data_path=Path(TASK['CLEANED_DATA_PATH']),
+        dataset_path = Path(TASK['CLEANED_DATA_PATH']),
         dropout=0.5,
         dense_features=None,
         savedir=Path(TASK['MODELS_PATH']),
@@ -323,7 +326,9 @@ class RunTask:
             the CPU
 
         """
-        histogram_path = Path(cleaned_data_path) / "histogram_all_full.npz"
+        # histogram_path = Path(cleaned_data_path) / "histogram_all_full.npz"
+
+        histogram_path = dataset_path
 
         model = ConvModel(
             in_channels=9,
@@ -353,7 +358,8 @@ class RunTask:
 
     @staticmethod
     def train_rnn(
-        cleaned_data_path=Path( TASK['CLEANED_DATA_PATH'] ),
+        train_dataset=Path( TASK['CLEANED_DATA_PATH'] ),
+        valid_dataset=Path( TASK['CLEANED_DATA_PATH'] ),
         num_bins=512,
         hidden_size=96,
         rnn_dropout=0.75,
@@ -441,7 +447,8 @@ class RunTask:
             the CPU
 
         """
-        histogram_path = Path(cleaned_data_path) / "histogram_all_full.npz"
+        # histogram_path = Path(cleaned_data_path) / "histogram_all_full.npz"
+        # histogram_path = dataset_path
 
         model = RNNModel(
             in_channels=9,
@@ -460,7 +467,8 @@ class RunTask:
             TB_prefix=TB_prefix,
         )
         model.run(
-            histogram_path,
+            train_dataset,
+            valid_dataset,
             times,
             pred_years,
             num_runs,

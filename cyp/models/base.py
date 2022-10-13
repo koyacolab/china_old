@@ -16,6 +16,10 @@ from pprint import pprint
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
+import os
+
+from pathlib import Path
+
 class ModelBase:
     """
     Base class for all models
@@ -37,7 +41,7 @@ class ModelBase:
         device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
         TB_prefix='TB_',
     ):
-        self.savedir = savedir / model_type
+        self.savedir = Path( savedir ) / model_type 
         self.savedir.mkdir(parents=True, exist_ok=True)
 
         print(f"Using {device.type}")
@@ -65,7 +69,8 @@ class ModelBase:
 
     def run(
         self,
-        path_to_histogram=Path("data/img_output/histogram_all_full.npz"),
+        train_histogram=Path("data/img_output/histogram_all_full.npz"),
+        valid_histogram=Path("data/img_output/histogram_all_full.npz"), 
         times="all",
         pred_years=2018,
         num_runs=2,
@@ -108,7 +113,7 @@ class ModelBase:
             The number of epochs to wait without improvement in the validation loss before terminating training.
             Note that the original repository doesn't use early stopping.
         """
-
+        print('run dataset : ', train_histogram, valid_histogram)
         print('run : pred_years: {}, batch_size: {}, num_runs: {}'.format(pred_years, batch_size, num_runs))
 
         # with np.load(path_to_histogram) as hist:
@@ -168,7 +173,8 @@ class ModelBase:
         # print(f"Finished generating image augmentation for {pred_years}!")
 
         hist_train = dict()
-        with np.load(f"histogram_all_augmented.npz") as hist:
+        # with np.load(f"histogram_all_augmented.npz") as hist:
+        with np.load(train_histogram) as hist:
             images = hist["output_image"]
             locations = hist["output_locations"]
             yields = hist["output_yield"]
@@ -183,7 +189,7 @@ class ModelBase:
             # areas = hist["output_areas"]
 
         hist_valid = dict()
-        with np.load(f"histogram_all_full.npz") as hist:
+        with np.load(valid_histogram) as hist:
             # print(hist.keys())
             images = hist["output_image"]
             locations = hist["output_locations"]
@@ -310,7 +316,7 @@ class ModelBase:
         # times in one call to run()
         self.reinitialize_model(time=time)
 
-        TB_writer = SummaryWriter(log_dir=f'runs/' + f'{self.TB_prefix}_{predict_year}_{run_number}_{batch_size}', max_queue=1, flush_secs=10)
+        TB_writer = SummaryWriter(log_dir=str(self.savedir) + f'/runs/' + f'{self.TB_prefix}_{predict_year}_{run_number}_{batch_size}', max_queue=2, flush_secs=10)
 
         train_scores, val_scores = self._train(
             train_data.images,
