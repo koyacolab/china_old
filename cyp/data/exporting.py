@@ -173,7 +173,7 @@ class MODISExporter:
         count = 0
 
         # MAJOR_COUNTY = [0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 15, 17, 20, 21, 23, 29]
-        MAJOR_COUNTY = [0, 1, 8, 20, 21, 29]
+        # MAJOR_COUNTY = [0, 1, 8, 20, 21, 29]
 
         for state_id, county_id in np.unique(
             self.locations[["State", "County"]].values, axis=0
